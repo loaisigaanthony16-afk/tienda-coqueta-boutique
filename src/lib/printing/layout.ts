@@ -126,11 +126,12 @@ export class DocBuilder {
   }
 
   /** Párrafo ajustado al ancho. */
-  text(text: string, opts: { align?: Align; bold?: boolean; size?: 1 | 2 } = {}) {
+  text(text: string, opts: { align?: Align; bold?: boolean; size?: 1 | 2; indent?: number } = {}) {
     const size = opts.size ?? 1;
+    const indent = opts.indent ?? 0;
     const width = Math.floor(this.columns / size);
-    for (const line of wrap(this.clean(text), width)) {
-      this.lines.push({ type: "text", text: line, align: opts.align ?? "left", bold: opts.bold, size });
+    for (const line of wrap(this.clean(text), width - indent)) {
+      this.lines.push({ type: "text", text: " ".repeat(indent) + line, align: opts.align ?? "left", bold: opts.bold, size });
     }
     return this;
   }
@@ -240,7 +241,7 @@ export function layoutReceipt(sale: SaleWithItems, opts: ReceiptLayoutOptions): 
   for (const p of sale.payments) {
     methods.add(p.method);
     b.pair(PAYMENT_LABEL[p.method], money(p.amount));
-    if (p.reference) b.text(`  Ref: ${p.reference}`);
+    if (p.reference) b.text(`Ref: ${p.reference}`, { indent: 2 });
   }
   const tendered = sale.payments
     .filter((p) => p.method === "cash")

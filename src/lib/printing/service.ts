@@ -2,7 +2,6 @@
  * Servicio de impresión: elige el transporte según las preferencias, mantiene
  * la conexión y cae a window.print() si el hardware falla.
  */
-"use client";
 import { create } from "zustand";
 import { printDocsInBrowser } from "./browser-print";
 import { drawerKickBytes, encodeDocs } from "./escpos";

@@ -82,23 +82,11 @@ export function ProductEditor({
   /** null = producto nuevo. */
   product: Product | null;
 }) {
-  // Nueva clave en cada apertura para reiniciar el formulario.
-  const [session, setSession] = React.useState(0);
-  const [prevOpen, setPrevOpen] = React.useState(open);
-  if (open !== prevOpen) {
-    setPrevOpen(open);
-    if (open) setSession((s) => s + 1);
-  }
+  // El contenido del Sheet se desmonta al cerrar, así cada apertura parte limpia.
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="gap-0 overflow-hidden p-0 sm:max-w-3xl">
-        {open && (
-          <EditorBody
-            key={`${product?.id ?? "new"}-${session}`}
-            product={product}
-            onDone={() => onOpenChange(false)}
-          />
-        )}
+        <EditorBody key={product?.id ?? "new"} product={product} onDone={() => onOpenChange(false)} />
       </SheetContent>
     </Sheet>
   );
@@ -109,11 +97,9 @@ function EditorBody({ product, onDone }: { product: Product | null; onDone: () =
   const allProducts = useCatalog((s) => s.products);
   const allVariants = useCatalog((s) => s.variants);
 
-  const existing = React.useMemo(
-    () => (product ? allVariants.filter((v) => v.productId === product.id) : []),
-    // Solo al abrir: una recarga del catálogo no debe pisar lo que se edita.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+  // Foto al abrir: una recarga del catálogo no debe pisar lo que se edita.
+  const [existing] = React.useState(() =>
+    product ? allVariants.filter((v) => v.productId === product.id) : [],
   );
 
   // ---------- Campos del producto ----------

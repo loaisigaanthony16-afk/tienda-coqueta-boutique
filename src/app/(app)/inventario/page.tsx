@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { InventoryView } from "@/components/inventory/inventory-view";
 
 export const metadata: Metadata = { title: "Inventario" };
 
 export default function Page() {
-  return <div className="p-6 text-sm text-muted-foreground">Inventario: en construcción.</div>;
+  return <InventoryView />;
 }
