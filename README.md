@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tienda Coqueta Boutique · POS + ERP
 
-## Getting Started
+Punto de venta e inventario para boutique de ropa y accesorios. Minimalista, rápido y pensado para pantalla táctil, teclado y lector de códigos.
 
-First, run the development server:
+## Módulos
+
+| Ruta | Módulo | Rol |
+| --- | --- | --- |
+| `/pos` | Terminal de venta: escáner USB/cámara, carrito, descuentos, cobro en efectivo, tarjeta, transferencia o mixto | Todos |
+| `/caja` | Apertura obligatoria, entradas/salidas, arqueo en vivo, corte X y cierre Z | Todos |
+| `/ventas` | Historial, reimpresión y anulación (solo admin) | Todos |
+| `/inventario` | Productos con matriz talla × color, SKU/EAN‑13 automáticos, ajustes de stock, etiquetas | Admin edita |
+| `/reportes` | KPIs, márgenes, top productos, exportación a Excel/PDF | Admin |
+| `/ajustes` | Impresora térmica ESC/POS (Bluetooth, USB serial o navegador), lector, datos demo | Todos |
+
+## Arranque rápido
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm test           # pruebas del dominio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sin variables de entorno funciona en **modo demo**: todo vive en el navegador (localStorage) con 27 productos y 30 días de ventas de ejemplo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- PIN admin: `1234`
+- PIN caja: `0000`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Para producción con Supabase, ver [`supabase/README.md`](supabase/README.md) y copiar `.env.example` a `.env.local`.
 
-## Learn More
+## Atajos de teclado
 
-To learn more about Next.js, take a look at the following resources:
+| Tecla | Acción |
+| --- | --- |
+| `Ctrl/Cmd + K` | Buscar producto o acción |
+| `F1` `F2` `F3` `F4` `F6` `F7` | Vender, Caja, Ventas, Inventario, Reportes, Ajustes |
+| `F9` o `Ctrl + Enter` | Cobrar |
+| `Enter` | Confirmar cobro / nueva venta |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Arquitectura
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  domain/      Lógica pura en centavos: dinero, precios, pagos, arqueo, códigos (con pruebas)
+  data/        Contrato Repository + implementación demo (localStorage) y Supabase
+  stores/      Estado con Zustand: sesión, catálogo, caja, carrito
+  components/  ui/ (estilo shadcn), shell/, pos/, inventory/, cash/, reports/, sales/, settings/
+  lib/         config de la tienda, formato, impresión ESC/POS, exportación, analítica
+supabase/      schema.sql (tablas, triggers, RLS, RPC), seed.sql
+```
 
-## Deploy on Vercel
+Reglas clave:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Todo el dinero se maneja en **centavos enteros** con redondeo "mitad lejos de cero", igual que PostgreSQL.
+- Los precios incluyen **IVA 15 %** (configurable en `src/lib/config.ts`).
+- La venta es **atómica**: el servidor recalcula precios, valida stock y pagos, y descuenta inventario en una sola transacción.
+- Una venta anulada devuelve el stock y sale del arqueo.
