@@ -12,7 +12,6 @@ import {
   setPrinterTransport,
   usePrinterSettings,
   usePrinterStatus,
-  TRANSPORT_LABEL,
   type PrinterTransportKind,
 } from "@/lib/printing";
 import { BAUD_RATES } from "@/lib/printing/settings";

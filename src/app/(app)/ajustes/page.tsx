@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { SettingsPage } from "@/components/settings/settings-page";
 
 export const metadata: Metadata = { title: "Ajustes" };
 
 export default function Page() {
-  return <div className="p-6 text-sm text-muted-foreground">Ajustes: en construcción.</div>;
+  return <SettingsPage />;
 }
