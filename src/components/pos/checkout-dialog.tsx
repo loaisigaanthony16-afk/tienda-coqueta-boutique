@@ -7,7 +7,7 @@ import { PAYMENT_LABEL, quickCashOptions, settle, type TenderInput } from "@/dom
 import type { Cents, PaymentMethod, SaleWithItems } from "@/domain/types";
 import { repo, RepositoryError } from "@/data";
 import { STORE } from "@/lib/config";
-import { printReceipt } from "@/lib/printing";
+import { autoPrintReceipt, printReceipt } from "@/lib/printing";
 import { cn, uid } from "@/lib/utils";
 import { useCart } from "@/stores/cart";
 import { useCatalog } from "@/stores/catalog";
@@ -148,6 +148,10 @@ function PaymentForm({
       );
       useCart.getState().clear();
       onSuccess(sale);
+      const cashierName = useSession.getState().user?.fullName;
+      autoPrintReceipt(sale, { cashierName }).catch((e) =>
+        toast.error(e instanceof Error ? e.message : "No se pudo imprimir el ticket"),
+      );
       void useRegister
         .getState()
         .refresh()

@@ -11,6 +11,7 @@ import { TopBar } from "./top-bar";
 import { BottomNav } from "./bottom-nav";
 import { CommandPalette } from "./command-palette";
 import { NAV } from "./nav";
+import { autoReconnectPrinter } from "@/lib/printing";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const status = useSession((s) => s.status);
@@ -29,6 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (status !== "authenticated") return;
     void Promise.all([loadCatalog(true), refreshRegister()]);
+    void Promise.resolve(autoReconnectPrinter()).catch(() => {});
   }, [status, loadCatalog, refreshRegister]);
 
   // Atajos globales: Ctrl/Cmd+K paleta, F-keys navegación.
